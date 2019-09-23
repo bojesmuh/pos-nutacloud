@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>POS</title>
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="assets/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css"/>
+	<link rel="stylesheet" href="assets/plugins/bootstrap-datepicker/css/bootstrap-datepicker.standalone.min.css"/>
+	<!-- <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script> -->
+	<!-- <script type="text/javascript" src="https://rawgit.com/KevinSheedy/jquery.alphanum/master/jquery.alphanum.js"></script> -->
+	<script src="assets/js/jquery.min.js"></script>
+	<script src="assets/js/jquery.alphanum.js"></script>
+
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-12">
+					<form class="form-horizontal" style="margin-top: 10px;">
+						<div class="form-group">
+							<label class="col-sm-2 control-label">
+								Nama Pelanggan
+							</label>
+							<div class="col-sm-4">
+								<input type="text" class="form-control" name="customer" id="customer"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label">
+								Tanggal
+							</label>
+							<div class="col-sm-3">
+								<div class="input-group date">
+									<input type="text" class="form-control" id="datepicker" />
+									<span class="input-group-addon">
+										<span class="glyphicon glyphicon-th">
+										</span>
+									</span>
+								</div>
+							</div>
+							<div class="col-sm-1">
+								<input type="text" name="time" id="time" class="form-control"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label">
+								Item yang dijual:
+							</label>
+							<div class="col-sm-10">
+								<div class="table-responsive">
+									<table class="table  table-bordered table-striped">
+										<thead>
+											<tr>
+												<th width="10%">
+													Item
+												</th>
+												<th width="15%">
+													Qty
+												</th>
+												<th width="15%">
+													Harga Satuan
+												</th>
+												<th width="15%">
+													Subtotal
+												</th>
+												<th width="2%">
+												</th>
+											</tr>
+										</thead>
+										<tbody id="add_item_tr">
+
+										</tbody>
+									</table>
+								</div>
+								<a href="javascript:void(0)" id="add_item">
+									<i class="glyphicon glyphicon-plus">
+									</i>
+									Tambah Item Lain
+								</a>
+							</div>
+						</div>
+						<div class="pull-right">
+							<div class="form-group">
+								<label class="col-sm-4 control-label">
+									Total
+								</label>
+								<div class="col-sm-8">
+									<input type="text" name="total" id="total" class="form-control" readonly="" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-4 control-label">
+									Bayar Tunai
+								</label>
+								<div class="col-sm-8">
+									<input type="tex" name="pay_cash" id="pay_cash" class="form-control"/>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-4 control-label">
+									Kembali
+								</label>
+								<div class="col-sm-8">
+									<input type="text" name="change" id="change" class="form-control" readonly=""/>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-offset-2 col-sm-10">
+									<button type="button" class="btn btn-default" id="save">
+										Cancels
+									</button>
+									<button type="button" class="btn btn-primary" id="save">
+										Simpan
+									</button>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<!-- Javascript -->
+
+		<scrip type="text/javascript" src="assets/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="assets/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+
+			<script>
+		
+		$(document).ready(function() {
+
+			
+			$('.input-group.date').datepicker({
+					format : 'dd/mm/yyyy',
+					autoclose: true,
+					todayHighlight: true,
+				});
+
+			
+
+			var count = 1;
+			add_item(count);
+			$(document).on('click', '#add_item', function(){
+				count = count + 1;
+				add_item(count);
+			});
+
+			$(document).on('click', '.remove', function(){
+				var row_id = $(this).attr("id");
+				$('#row-table'+row_id).remove();
+			});
+
+			function add_item(count){
+				output = '<tr id="row-table'+count+'">';
+				output += '<td><input type="text" name="item" id="item" class="form-control item"/></td><td><input type="text" name="qty" id="qty" class="form-control qty"/></td><td><input type="text" name="price" id="price" class="form-control price"/></td><td><input type="text" name="subtotal" id="subtotal" class="form-control subtotal" readonly/></td><td><button id="'+count+'" class="btn btn-default remove" type="button"><i class="glyphicon glyphicon-trash"></i></button></td>';
+				$('#add_item_tr').append(output);
+			};
+
+			$(document).on('keyup', '.qty', function(event) {
+				var currentRow=$(this).closest("tr");
+				currentRow.find('.qty').numeric(); 
+				currentRow.find('.price').numeric(); 
+
+				var qty = currentRow.find('.qty').val();
+				var price = currentRow.find('.price').val();
+				var subtotal = qty * price;
+				currentRow.find('.subtotal').val(subtotal);
+				sumTotal();
+
+			});
+
+			$(document).on('keyup', '.price', function(event) {
+				var currentRow=$(this).closest("tr"); 
+				currentRow.find('.qty').numeric(); 
+				currentRow.find('.price').numeric(); 
+
+				var qty = currentRow.find('.qty').val();
+				var price = currentRow.find('.price').val();
+				var subtotal = qty * price;
+				currentRow.find('.subtotal').val(subtotal);
+				sumTotal();
+
+			});
+
+			function sumTotal(){
+				var total = 0;
+				$('.subtotal').each(function() {
+					var currentRow=$(this).closest("tr"); 
+					total += parseFloat(currentRow.find('.subtotal').val());
+				});
+				$('#total').val(total);
+			}
+
+			$(document).on('keyup', '#pay_cash', function() {
+				var total = $('#total').val();
+				var pay_cash = $(this).val();
+				var change = parseFloat(pay_cash) - parseFloat(total);
+				console.log(total);
+				console.log(pay_cash);
+				$('#change').val(change);
+			});
+
+			$(document).on('click', '#save', function() {
+				var array_item = [];
+				$('tr').each(function() {
+					// var currentRow=$(this).closest("tr"); 
+					
+					var item = $(this).find('.item').val();
+					
+					var qty = $(this).find('.qty').val();
+					var price = $(this).find('.price').val();
+					var subtotal = $(this).find('.subtotal').val();
+					var ObjItem = {
+						"item" : item,
+						"Qty" : qty,
+						"HargaSatuan" : price,
+						"Subtotal" : subtotal,
+					};
+					var Obj = Object.assign({}, ObjItem);
+					array_item.push(Obj)
+					});
+				var customer = $('#customer').val();
+				var date = $('#datepicker').val();
+				var time = $('#time').val();
+				var total = $('#total').val();
+				var pay_cash = $('#pay_cash').val();
+				var change = $('#change').val();
+				var ObjSale = {
+					"NamaPelanggan" : customer,
+					"Tanggal" : date,
+					"Jam" : time,
+					"Total" : total,
+					"BayarTunai" : pay_cash,
+					"Kembali" : change,
+					"DetilPenjualan" : array_item
+				}
+				alert(JSON.stringify(ObjSale));
+				console.log(ObjSale);
+			});
+
+			
+
+
+		});
+	</script>
+</body>
+</html>
